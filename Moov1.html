@@ -3,152 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>18+</title>
-    
+    <title>Secure Content Delivery</title>
     <style>
-        /* Основные стили для страницы */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #2e015a, #6829b7);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            padding: 0;
-            position: relative;
-            overflow: hidden;
         }
-        .gif-container {
-            position: fixed;
-            left: 50%;
-            bottom: 5%;
-            transform: translateX(-50%);
-            width: 60vw;
-            height: auto;
-            z-index: -1;
-        }
-        .gif-container img {
-            width: 100%;
-            height: auto;
-        }
-        /* Стиль для стрелки */
-        .arrow {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 50%;
-            animation: bounce 2s infinite;
-        }
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-15px);
-            }
-            60% {
-                transform: translateY(-15px);
-            }
-        }
-        /* Стандартный лендинг */
-        .default-landing {
-            display: block;
+        .container {
             text-align: center;
-            margin-top: 40%;
+            background-color: #472b71;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            color: white;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
         }
-        /* Стиль для уведомлений */
-        .notification {
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 12px;
-            padding: 16px 20px;
-            width: 90%;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .container.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
-        .notification-title {
-            font-size: 20px;
-            font-weight: bold;
-            text-align: left;
-            margin-bottom: 8px;
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #6829b7;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
-        .instructions {
-            font-size: 17px;
-            font-weight: normal;
-            text-align: left;
-            margin-bottom: 6px;
-            line-height: 1.3;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        button {
+            background: #6829b7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        #alertText {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: #2e015a;
+            border-radius: 5px;
         }
     </style>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
-        // Функция автоперевода
-        function translateText(text, targetLanguage) {
-            var googleTranslateUrl = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" + targetLanguage + "&dt=t&q=" + encodeURIComponent(text);
+        // Конфигурация безопасности
+        const securityConfig = {
+            checkDelay: 2000, // Увеличенная задержка
+            interactionTime: 1500,
+            botPatterns: [
+                /Googlebot/i,
+                /bingbot/i,
+                /FacebookExternalHit/i,
+                /Twitterbot/i
+            ],
+            safeUrls: [
+                'https://www.youtube.com/watch?v=9bZkp7q19f0',
+                'https://ru.wikipedia.org/wiki/Искусственный_интеллект'
+            ]
+        };
 
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", googleTranslateUrl, false);
-            xhr.send();
+        // Система защиты
+        (function() {
+            let interactionDetected = false;
+            const isDebug = new URLSearchParams(window.location.search).has('debug');
 
-            if (xhr.status === 200) {
-                var response = JSON.parse(xhr.responseText);
-                if (response && response[0] && response[0][0] && response[0][0][0]) {
-                    return response[0][0][0];
-                }
-            }
+            const checks = {
+                ua: securityConfig.botPatterns.some(p => p.test(navigator.userAgent)),
+                plugins: navigator.plugins.length === 0,
+                screen: window.screen.width < 500,
+                interaction: false
+            };
 
-            // Возвращаем исходный текст, если перевод не удался
-            return text;
-        }
-
-        function translateElements() {
-            $('[data-translate]').each(function () {
-                const key = $(this).data('translate');
-                const translatedText = translateText(key, navigator.language || navigator.userLanguage);
-                $(this).text(translatedText);
+            // Отслеживание взаимодействия
+            ['mousemove', 'touchstart', 'keydown'].forEach(evt => {
+                window.addEventListener(evt, () => {
+                    interactionDetected = true;
+                }, { once: true });
             });
-        }
 
-        // Запускаем автоперевод после загрузки DOM
-        document.addEventListener('DOMContentLoaded', () => {
-            translateElements();
-
-            // Проверяем User-Agent
-            const ua = navigator.userAgent.toLowerCase();
-            const isRestricted = /tiktok|musically|bytedance/i.test(ua);
-
-            // Если User-Agent содержит tiktok, musically или bytedance, ничего не делаем
-            if (!isRestricted) {
-                // Для всех остальных случаев выполняем редирект через 1 секунду
-                setTimeout(() => {
-                    window.location.href = "https://annitalove1.blogspot.com"; // Замените {offer} на ваш URL
-                }, 100);
-            }
             setTimeout(() => {
-    // Проверяем, что устройство работает на Android
-            const isAndroid = /android/i.test(navigator.userAgent);
-
-            if (isAndroid) {
-        // Создаем URL-интент для Android (без fallback)
-            const intentUrl = "intent:https://annitalove1.blogspot.com#Intent;scheme=https;package=com.android.chrome;end";
-            window.location.href = intentUrl;
-               }
-    }, 100);
-        });
+                if (!isDebug && checks.ua && !interactionDetected) {
+                    window.location.replace(
+                        securityConfig.safeUrls[Math.floor(Math.random() * securityConfig.safeUrls.length)]
+                    );
+                } else {
+                    document.querySelector('.container').classList.add('visible');
+                }
+            }, securityConfig.checkDelay);
+        })();
     </script>
 </head>
 <body>
-    <!-- GIF фона -->
-    <div class="gif-container">
-        <img src="https://s4.gifyu.com/images/bLSi6.gif" alt="Background GIF">
-    </div>
-
-    <!-- Стандартный лендинг -->
-    <div class="default-landing">
-        <img src="https://cdn.imgpile.com/f/sGTgXj2_xl.png" alt="Arrow" class="arrow">
-        <div class="notification">
-            <div class="notification-title" data-translate="You must launch a browser to open the 18+ version of the website.">You must launch a browser to open the 18+ version of the website.</div>
-            <div class="instructions" data-translate="1. Click on the three dots in the top right corner.">1. Click on the three dots in the top right corner.</div>
-            <div class="instructions" data-translate="2. Select 'Open in browser' from that Popup menu.">2. Select 'Open in browser' from that Popup menu.</div>
+    <div class="container">
+        <h1 id="mainHeader">
+            <div class="loader"></div>
+            <div id="countdown" style="display: none;">3</div>
+        </h1>
+        <div id="buttonsContainer">
+            <button id="openLinkButton">Open Link</button>
+            <button onclick="copyLink()">Copy Link</button>
+        </div>
+        <div id="alertText">
+            <div class="status-title">Status</div>
+            <div class="status-message">Loading...</div>
         </div>
     </div>
+
+    <script>
+        // Конфигурация приложения
+        const link = 'annitalove1.blogspot.com';
+        const redirectUrl = 'https://' + link;
+        let isTikTokBrowser = false;
+        let isIOS = false;
+        let isAndroid = false;
+
+        // Инициализация
+        setTimeout(() => {
+            isTikTokBrowser = /TikTok|WebView/i.test(navigator.userAgent);
+            isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            isAndroid = /Android/i.test(navigator.userAgent);
+
+            initPlatformSpecificLogic();
+            setupEventHandlers();
+        }, securityConfig.interactionTime);
+
+        function initPlatformSpecificLogic() {
+            if (isIOS) {
+                document.getElementById('openLinkButton').style.display = 'none';
+                
+                if (isTikTokBrowser) {
+                    document.getElementById('mainHeader').innerHTML = `
+                        <video autoplay loop muted playsinline style="width: min(90vw, 300px); border-radius: 10px;">
+                            <source src="https://i.imgur.com/AVOl5S8.mp4" type="video/mp4">
+                        </video>
+                        <div style="margin: 15px 0; font-size: 0.9em;">
+                            Follow the video instructions above, or just tap the "Copy Link" button and paste it into your Google or Safari browser.
+                        </div>`;
+                } else {
+                    window.location.href = `http://${link}`;
+                }
+            }
+
+            if (isAndroid) {
+                let count = 3;
+                const countdown = document.getElementById('countdown');
+                countdown.style.display = 'block';
+                
+                const timer = setInterval(() => {
+                    countdown.textContent = count--;
+                    if (count < 0) {
+                        clearInterval(timer);
+                        openLink();
+                    }
+                }, 1000);
+            }
+        }
+
+        function setupEventHandlers() {
+            document.getElementById('openLinkButton').addEventListener('click', openLink);
+        }
+
+        function openLink() {
+            if (isIOS && isTikTokBrowser) return copyLink();
+            
+            if (isAndroid) {
+                window.location.href = `intent://${link}#Intent;package=com.android.chrome;scheme=https;end`;
+            }
+            
+            window.open(redirectUrl, '_blank');
+            showAlert('Redirecting to content...');
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(redirectUrl)
+                .then(() => showAlert('Link copied!'))
+                .catch(() => showAlert('Allow clipboard access', true));
+        }
+
+        function showAlert(message, isError = false) {
+            const alert = document.getElementById('alertText');
+            alert.style.display = 'block';
+            alert.style.background = isError ? '#5a0000' : '#004d00';
+            alert.querySelector('.status-message').textContent = message;
+            setTimeout(() => alert.style.display = 'none', 3000);
+        }
+    </script>
 </body>
 </html>
