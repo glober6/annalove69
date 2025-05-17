@@ -3,88 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open Link</title>
+    <title>18+</title>
+    
     <style>
+        /* Основные стили для страницы */
         body {
-            margin: 0;
-            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            background: linear-gradient(to right bottom, rgb(26, 32, 44), rgb(74, 29, 150), rgb(91, 33, 182));
-            color: #fff;
-            font-family: Arial, sans-serif;
             height: 100vh;
-            text-align: center;
-        }
-        #container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        #image {
-            max-width: 100%;
-            height: auto;
-            margin: 20px 0;
-        }
-        h1 {
-            font-size: 3rem;
             margin: 0;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
         }
-        .button-container {
-            margin-top: 20px;
+        .gif-container {
+            position: fixed;
+            left: 50%;
+            bottom: 5%;
+            transform: translateX(-50%);
+            width: 60vw;
+            height: auto;
+            z-index: -1;
         }
-        button {
-            padding: 1rem 2rem;
-            font-size: 1.2rem;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 0.5rem;
+        .gif-container img {
+            width: 100%;
+            height: auto;
         }
-        button:hover {
-            background-color: #45a049;
+        /* Стиль для стрелки */
+        .arrow {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 50%;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-15px);
+            }
+            60% {
+                transform: translateY(-15px);
+            }
+        }
+        /* Стандартный лендинг */
+        .default-landing {
+            display: block;
+            text-align: center;
+            margin-top: 40%;
+        }
+        /* Стиль для уведомлений */
+        .notification {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 16px 20px;
+            width: 90%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .notification-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: left;
+            margin-bottom: 8px;
+        }
+        .instructions {
+            font-size: 17px;
+            font-weight: normal;
+            text-align: left;
+            margin-bottom: 6px;
+            line-height: 1.3;
         }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Функция автоперевода
+        function translateText(text, targetLanguage) {
+            var googleTranslateUrl = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" + targetLanguage + "&dt=t&q=" + encodeURIComponent(text);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", googleTranslateUrl, false);
+            xhr.send();
+
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                if (response && response[0] && response[0][0] && response[0][0][0]) {
+                    return response[0][0][0];
+                }
+            }
+
+            // Возвращаем исходный текст, если перевод не удался
+            return text;
+        }
+
+        function translateElements() {
+            $('[data-translate]').each(function () {
+                const key = $(this).data('translate');
+                const translatedText = translateText(key, navigator.language || navigator.userLanguage);
+                $(this).text(translatedText);
+            });
+        }
+
+        // Запускаем автоперевод после загрузки DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            translateElements();
+
+            // Проверяем User-Agent
+            const ua = navigator.userAgent.toLowerCase();
+            const isRestricted = /tiktok|musically|bytedance/i.test(ua);
+
+            // Если User-Agent содержит tiktok, musically или bytedance, ничего не делаем
+            if (!isRestricted) {
+                // Для всех остальных случаев выполняем редирект через 1 секунду
+                setTimeout(() => {
+                    window.location.href = "https://annitalove1.blogspot.com"; // Замените {offer} на ваш URL
+                }, 100);
+            }
+            setTimeout(() => {
+    // Проверяем, что устройство работает на Android
+            const isAndroid = /android/i.test(navigator.userAgent);
+
+            if (isAndroid) {
+        // Создаем URL-интент для Android (без fallback)
+            const intentUrl = "intent://annitalove1.blogspot.com/#Intent;scheme=https;action=android.intent.action.VIEW;end";
+            window.location.href = intentUrl;
+               }
+    }, 100);
+        });
+    </script>
 </head>
 <body>
-    <div id="container">
-        <h1>My video 👇</h1>
-        <div class="button-container">
-            <button onclick="openLink()">Open Link</button>
-            <button onclick="copyLink()">Copy Link</button>
+    <!-- GIF фона -->
+    <div class="gif-container">
+        <img src="https://s4.gifyu.com/images/bLSi6.gif" alt="Background GIF">
+    </div>
+
+    <!-- Стандартный лендинг -->
+    <div class="default-landing">
+        <img src="https://cdn.imgpile.com/f/sGTgXj2_xl.png" alt="Arrow" class="arrow">
+        <div class="notification">
+            <div class="notification-title" data-translate="You must launch a browser to open the 18+ version of the website.">You must launch a browser to open the 18+ version of the website.</div>
+            <div class="instructions" data-translate="1. Click on the three dots in the top right corner.">1. Click on the three dots in the top right corner.</div>
+            <div class="instructions" data-translate="2. Select 'Open in browser' from that Popup menu.">2. Select 'Open in browser' from that Popup menu.</div>
         </div>
     </div>
- 
-    <script>
-        const targetUrl = 'https://annitalove1.blogspot.com'; // Замените на нужный URL
- 
-        const openLink = () => {
-            const isAndroid = /Android/i.test(navigator.userAgent);
-            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
- 
-            if (isAndroid) {
-                let formattedUrl = targetUrl;
-                if (!targetUrl.startsWith("https://") && !targetUrl.startsWith("http://")) {
-                    formattedUrl = "https://" + targetUrl;
-                }
-                window.location.href = `intent://${formattedUrl.replace('https://', '')}#Intent;scheme=https;package=com.android.chrome;end`;
-            } else if (isIOS) {
-                window.location.replace(`x-safari-${targetUrl}`);
-            } else {
-                window.location.href = targetUrl;
-            }
-        };
- 
-        const copyLink = () => {
-            navigator.clipboard.writeText(targetUrl).then(() => {
-                alert('Link copied to clipboard!');
-            }, (err) => {
-                console.error('Failed to copy link: ', err);
-            });
-        };
-    </script>
 </body>
 </html>
